@@ -40,7 +40,7 @@ public class DbUtil {
                 rs.close();
             }
         } catch ( SQLException e ) {
-            log.info( "Error closing ResultSet.", e );
+            log.fatal( "Error closing ResultSet.", e );
         }
     }
 
@@ -60,6 +60,7 @@ public class DbUtil {
                 dependency.setGroupId( rs.getString( "groupId" ) );
                 dependency.setArtifactId( rs.getString( "artifactId" ) );
                 dependency.setVersion( rs.getString( "version" ) );
+
                 dependency.setSha1( sha1 );
 
                 dependency.setValid( true );
@@ -80,6 +81,7 @@ public class DbUtil {
             stmt.setString( 1, d.getGroupId() );
             stmt.setString( 2, d.getArtifactId() );
             stmt.setString( 3, d.getVersion() );
+
             stmt.setString( 4, d.getSha1() );
 
             stmt.executeUpdate();

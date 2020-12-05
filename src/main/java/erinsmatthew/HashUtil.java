@@ -17,14 +17,13 @@ public class HashUtil {
         HashCode hashCode = null;
 
         try {
-            if ( file.toFile()
-                     .canRead() ) {
+            if ( Files.isReadable( file ) ) {
                 byte[] bytes = Files.readAllBytes( file );
 
                 hashCode = Hashing.sha1()
                                   .hashBytes( bytes );
             } else {
-                log.info( "Unable to read contents of file %s.", file.toString() );
+                log.info( "Unable to read contents of file {}.", file.toString() );
             }
         } catch ( IOException e ) {
             log.fatal( String.format( "Error calculating hash for %s", file.toString() ), e );
