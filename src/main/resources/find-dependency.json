@@ -7,6 +7,9 @@
   "createDependencySql": "CREATE TABLE dependencies ( groupId VARCHAR( 256 ) NOT NULL, artifactId VARCHAR( 256 ) NOT NULL, version VARCHAR( 256 ) NOT NULL, sha1 VARCHAR( 2048 ) NOT NULL );",
   "selectDependencySql": "SELECT groupId, artifactId, version FROM dependencies WHERE sha1 = ?;",
   "addDependencySql": "INSERT INTO dependencies ( groupId, artifactId, version, sha1 ) VALUES ( ?, ?, ?, ? );",
+  "inspectJar": true,
+  "pomPropertiesFile": "pom.properties",
+  "maxDepth": 8,
   "helpSummary": "java -jar find-dependency.jar [OPTIONS]",
   "repositories":[
     {

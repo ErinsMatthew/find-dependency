@@ -55,6 +55,6 @@ public class Dependency {
     @Override
     public String toString() {
         return String.format( "{groupId=%s, artifactId=%s, version=%s, sha1=%s}", this.getGroupId(),
-                              this.getArtifactId(), this.getVersion(), this.getVersion() );
+                              this.getArtifactId(), this.getVersion(), this.getSha1() );
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="debug" strict="true" name="XMLConfigTest"
-               packages="org.apache.logging.log4j.test">
+<Configuration status="debug" strict="true" name="XMLConfig"
+               packages="org.apache.logging.log4j">
     <Properties>
         <Property name="filename">target/test.log</Property>
     </Properties>
@@ -8,18 +8,7 @@
 
     <Appenders>
         <Appender type="Console" name="STDOUT">
-            <Layout type="PatternLayout" pattern="%m MDC%X%n"/>
-            <Filters>
-                <Filter type="MarkerFilter" marker="FLOW" onMatch="DENY" onMismatch="NEUTRAL"/>
-                <Filter type="MarkerFilter" marker="EXCEPTION" onMatch="DENY" onMismatch="ACCEPT"/>
-            </Filters>
-        </Appender>
-        <Appender type="Console" name="FLOW">
-            <Layout type="PatternLayout" pattern="%C{1}.%M %m %ex%n"/><!-- class and line number -->
-            <Filters>
-                <Filter type="MarkerFilter" marker="FLOW" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
-                <Filter type="MarkerFilter" marker="EXCEPTION" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
+            <Layout type="PatternLayout" pattern="%m%n"/>
         </Appender>
         <Appender type="File" name="File" fileName="${filename}">
             <Layout type="PatternLayout">
@@ -29,13 +18,6 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="org.apache.logging.log4j.test1" level="debug" additivity="false">
-            <Filter type="ThreadContextMapFilter">
-                <KeyValuePair key="test" value="123"/>
-            </Filter>
-            <AppenderRef ref="STDOUT"/>
-        </Logger>
-
         <Logger name="org.apache.logging.log4j.test2" level="debug" additivity="false">
             <AppenderRef ref="File"/>
         </Logger>
@@ -44,5 +26,4 @@
             <AppenderRef ref="STDOUT"/>
         </Root>
     </Loggers>
-
 </Configuration>

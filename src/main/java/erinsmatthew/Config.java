@@ -13,12 +13,32 @@ public class Config {
 
     private static final char NULL_CHAR = '\u0000';
 
-    private boolean inspectJar;
     private List< Repository > repositories;
 
     private Options options;
 
     private String directory;
+
+    private boolean inspectJar;
+
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+
+    public void setMaxDepth( int maxDepth ) {
+        this.maxDepth = maxDepth;
+    }
+
+    public String getPomPropertiesFile() {
+        return pomPropertiesFile;
+    }
+
+    public void setPomPropertiesFile( String pomPropertiesFile ) {
+        this.pomPropertiesFile = pomPropertiesFile;
+    }
+
+    private int maxDepth;
+    private String pomPropertiesFile;
 
     private String dbDriver;
     private String dbConnection;
@@ -26,8 +46,13 @@ public class Config {
     private String dbPassword;
 
     private String selectDependencySql;
-
     private String addDependencySql;
+    private String createDependencySql;
+    private String schemaExistsSql;
+
+    private String helpSummary;
+
+    private ArrayList< CommandLineOption > commandLineOptions;
 
     public String getAddDependencySql() {
         return addDependencySql;
@@ -85,8 +110,6 @@ public class Config {
         this.directory = directory;
     }
 
-    private String helpSummary;
-
     public String getHelpSummary() {
         return helpSummary;
     }
@@ -103,10 +126,6 @@ public class Config {
         this.commandLineOptions = commandLineOptions;
     }
 
-    private ArrayList< CommandLineOption > commandLineOptions;
-
-    private String createDependencySql;
-
     public String getCreateDependencySql() {
         return createDependencySql;
     }
@@ -115,11 +134,12 @@ public class Config {
         this.createDependencySql = createDependencySql;
     }
 
-    private String schemaExistsSql;
-
     public void parse( String[] args ) {
         options = new Options();
 
+        //
+        //  build command line options from values specified in JSON
+        //
         for ( CommandLineOption opt : this.getCommandLineOptions() ) {
             Option o = new Option( opt.getShortName(), opt.getLongName(), opt.hasArg(),
                                    opt.getDescription() );
@@ -165,8 +185,6 @@ public class Config {
             }
         } catch ( ParseException e ) {
             log.fatal( "Error parsing options.", e );
-
-            return;
         }
     }
 
