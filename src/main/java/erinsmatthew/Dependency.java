@@ -1,11 +1,6 @@
 package erinsmatthew;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class Dependency {
-    private static final Logger log = LogManager.getLogger( Dependency.class );
-
     private boolean valid;
     private String groupId;
     private String artifactId;
