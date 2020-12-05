@@ -145,7 +145,7 @@ public class FindDependency {
         //  https://maven.apache.org/shared/maven-archiver/#pom-properties-content
         //
         try ( FileSystem fs = FileSystems.newFileSystem( file, null ) ) {
-            Path mavenDirectory = Paths.get( "/META-INF/maven" );
+            Path mavenDirectory = fs.getPath( "/META-INF/maven" );
 
             if ( Files.exists( mavenDirectory ) ) {
                 //
@@ -197,7 +197,7 @@ public class FindDependency {
                                         .map( r -> searchBySHA1( sha1, r ) )
                                         .collect( Collectors.toList() );
 
-        Dependency dependency = null;
+        Dependency dependency;
 
         if ( results.size() == 1 ) {
             dependency = results.get( 0 );
@@ -217,7 +217,7 @@ public class FindDependency {
                                                                       .replace( "{}", sha1 ) ) )
                                          .build();
 
-        HttpResponse< String > response = null;
+        HttpResponse< String > response;
 
         try {
             response = client.send( request, HttpResponse.BodyHandlers.ofString() );
