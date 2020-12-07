@@ -1,11 +1,29 @@
 package erinsmatthew;
 
 public class Dependency {
-    private boolean valid;
+    private transient boolean valid;
+
     private String groupId;
     private String artifactId;
     private String version;
-    private String sha1;
+
+    private transient String sha1;
+
+    private String originalFileName;
+
+    @Override
+    public String toString() {
+        return String.format( "{groupId=%s, artifactId=%s, version=%s, sha1=%s}", this.getGroupId(),
+                              this.getArtifactId(), this.getVersion(), this.getSha1() );
+    }
+
+    public String getOriginalFileName() {
+        return originalFileName;
+    }
+
+    public void setOriginalFileName( String originalFileName ) {
+        this.originalFileName = originalFileName;
+    }
 
     public String getSha1() {
         return sha1;
@@ -45,11 +63,5 @@ public class Dependency {
 
     public void setValid( boolean valid ) {
         this.valid = valid;
-    }
-
-    @Override
-    public String toString() {
-        return String.format( "{groupId=%s, artifactId=%s, version=%s, sha1=%s}", this.getGroupId(),
-                              this.getArtifactId(), this.getVersion(), this.getSha1() );
     }
 }

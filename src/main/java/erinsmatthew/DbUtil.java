@@ -57,9 +57,9 @@ public class DbUtil {
             rs = stmt.executeQuery();
 
             if ( rs.next() ) {
-                dependency.setGroupId( rs.getString( "groupId" ) );
-                dependency.setArtifactId( rs.getString( "artifactId" ) );
-                dependency.setVersion( rs.getString( "version" ) );
+                dependency.setGroupId( rs.getString( config.getGroupIdAttribute() ) );
+                dependency.setArtifactId( rs.getString( config.getArtifactIdAttribute() ) );
+                dependency.setVersion( rs.getString( config.getVersionAttribute() ) );
 
                 dependency.setSha1( sha1 );
 
@@ -74,19 +74,19 @@ public class DbUtil {
         return dependency;
     }
 
-    public static void save( Config config, Connection conn, Dependency d ) {
+    public static void save( Config config, Connection conn, Dependency dep ) {
         String insertString = config.getAddDependencySql();
 
         try ( PreparedStatement stmt = conn.prepareStatement( insertString ) ) {
-            stmt.setString( 1, d.getGroupId() );
-            stmt.setString( 2, d.getArtifactId() );
-            stmt.setString( 3, d.getVersion() );
+            stmt.setString( 1, dep.getGroupId() );
+            stmt.setString( 2, dep.getArtifactId() );
+            stmt.setString( 3, dep.getVersion() );
 
-            stmt.setString( 4, d.getSha1() );
+            stmt.setString( 4, dep.getSha1() );
 
             stmt.executeUpdate();
 
-            log.debug( "Added dependency {}.", d.toString() );
+            log.debug( "Added dependency {} to cache.", dep.toString() );
         } catch ( SQLException e ) {
             log.fatal( "Error running SQL.", e );
         }

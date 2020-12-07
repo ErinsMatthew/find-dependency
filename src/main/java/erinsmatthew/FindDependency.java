@@ -18,6 +18,7 @@ import java.nio.file.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -58,10 +59,59 @@ public class FindDependency {
                 //  process each file in specified directory;
                 //  use walk() instead of list() for recursive
                 //
-                // TODO: Filter files by extension? Allow for config.
                 Files.list( directory )
+                     .parallel()
                      .filter( Files::isRegularFile )
+                     .filter( FindDependency::isValidExtension )
                      .forEach( f -> processArchive( conn, f ) );
+
+                if ( cfg.showOutput() ) {
+                    //
+                    //  build a list of dependencies to show
+                    //
+                    List< Dependency > dependencies = Files.list( directory )
+                                                           .parallel()
+                                                           .filter( Files::isRegularFile )
+                                                           .filter(
+                                                                   FindDependency::isValidExtension )
+                                                           .map( f -> new AbstractMap.SimpleEntry< Path, String >(
+                                                                   f,
+                                                                   HashUtil.calculateSHA1( f ) ) )
+                                                           .map( se -> {
+                                                               Dependency d =
+                                                                       DbUtil.lookup( cfg, conn,
+                                                                                      se.getValue() );
+
+                                                               if ( d.isValid() ) {
+                                                                   d.setOriginalFileName(
+                                                                           se.getKey()
+                                                                             .getFileName()
+                                                                             .toString() );
+                                                               }
+
+                                                               return d;
+                                                           } )
+                                                           .filter( Dependency::isValid )
+                                                           .collect( Collectors.toList() );
+
+                    //
+                    //  write dependencies to a file
+                    //
+                    switch ( cfg.getOutputFormat() ) {
+                        case JSON:
+                        default:
+                            try ( Writer writer = new FileWriter( cfg.getOutputFileName() ) ) {
+                                new Gson().toJson( dependencies, writer );
+                            } catch ( IOException e ) {
+                                log.fatal( "Error writing JSON to file.", e );
+                            }
+                            break;
+
+                        case POM:
+                            System.out.print( dependencies.toString() );
+                            break;
+                    }
+                }
             } catch ( SQLException e ) {
                 log.fatal( "Error running SQL.", e );
             } catch ( IOException e ) {
@@ -74,6 +124,23 @@ public class FindDependency {
         }
     }
 
+    private static boolean isValidExtension( Path file ) {
+        boolean matches = false;
+
+        for ( String extension : cfg.getExtensions() ) {
+            if ( file.getFileName()
+                     .toString()
+                     .toLowerCase()
+                     .endsWith( extension.toLowerCase() ) ) {
+                matches = true;
+
+                break;
+            }
+        }
+
+        return matches;
+    }
+
     private static void loadConfig( String[] args ) {
         //
         //  read initial configuration from JSON file
@@ -81,9 +148,11 @@ public class FindDependency {
         Gson gson = new Gson();
 
         try ( final InputStream stream = FindDependency.class.getClassLoader()
-                                                             .getResourceAsStream( CONFIG_JSON );
-              final Reader reader = new InputStreamReader( stream, StandardCharsets.UTF_8 ) ) {
-            cfg = gson.fromJson( reader, Config.class );
+                                                             .getResourceAsStream( CONFIG_JSON ) ) {
+            assert stream != null;
+            try ( final Reader reader = new InputStreamReader( stream, StandardCharsets.UTF_8 ) ) {
+                cfg = gson.fromJson( reader, Config.class );
+            }
         } catch ( IOException e ) {
             log.fatal( "Error reading JSON.", e );
         }
@@ -129,23 +198,22 @@ public class FindDependency {
             if ( dependency.isValid() ) {
                 DbUtil.save( cfg, conn, dependency );
             }
+        } else {
+            log.info( "Found {} in cache.", file.getFileName() );
         }
-
-        //
-        //  output to POM or other locations
-        //
-        log.info( dependency );
     }
 
     private static Dependency inspectJar( Path file, String sha1 ) {
         Dependency dependency = new Dependency();
+
+        log.info( "Inspecting {} for pom.properties.", file.getFileName() );
 
         //
         //  check JAR file for pom.properties information.
         //  https://maven.apache.org/shared/maven-archiver/#pom-properties-content
         //
         try ( FileSystem fs = FileSystems.newFileSystem( file, null ) ) {
-            Path mavenDirectory = fs.getPath( "/META-INF/maven" );
+            Path mavenDirectory = fs.getPath( cfg.getMavenJarPath() );
 
             if ( Files.exists( mavenDirectory ) ) {
                 //
@@ -164,6 +232,8 @@ public class FindDependency {
                              .findFirst();
 
                 if ( pomProperties.isPresent() ) {
+                    log.info( "Found Maven pom.properties file for {}.", file.getFileName() );
+
                     //
                     //  read pom.properties
                     //
@@ -173,9 +243,12 @@ public class FindDependency {
 
                         properties.load( reader );
 
-                        dependency.setGroupId( properties.getProperty( "groupId" ) );
-                        dependency.setArtifactId( properties.getProperty( "artifactId" ) );
-                        dependency.setVersion( properties.getProperty( "version" ) );
+                        dependency.setGroupId(
+                                properties.getProperty( cfg.getGroupIdAttribute() ) );
+                        dependency.setArtifactId(
+                                properties.getProperty( cfg.getArtifactIdAttribute() ) );
+                        dependency.setVersion(
+                                properties.getProperty( cfg.getVersionAttribute() ) );
 
                         dependency.setSha1( sha1 );
 
@@ -191,17 +264,18 @@ public class FindDependency {
     }
 
     private static Dependency searchRepos( String sha1 ) {
-        //return all results, or one and done?
+        Dependency dependency;
+
         List< Dependency > results = cfg.getRepositories()
                                         .stream()
                                         .map( r -> searchBySHA1( sha1, r ) )
                                         .collect( Collectors.toList() );
 
-        Dependency dependency;
-
         if ( results.size() == 1 ) {
             dependency = results.get( 0 );
         } else {
+            log.debug( "Unable to identity a singular dependency with this SHA1." );
+
             dependency = new Dependency();
         }
 
@@ -214,16 +288,20 @@ public class FindDependency {
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest request = HttpRequest.newBuilder( URI.create( repo.getUrl()
-                                                                      .replace( "{}", sha1 ) ) )
+                                                                      .replace(
+                                                                              repo.getReplacementToken(),
+                                                                              sha1 ) ) )
                                          .build();
 
         HttpResponse< String > response;
 
         try {
+            log.info( "Searching Maven repository {} for {}.", repo.getName(), sha1 );
+
             response = client.send( request, HttpResponse.BodyHandlers.ofString() );
 
             if ( response != null ) {
-                log.debug( response.body() );
+                log.debug( "Maven Response = {}", response.body() );
 
                 Gson gson = new Gson();
 

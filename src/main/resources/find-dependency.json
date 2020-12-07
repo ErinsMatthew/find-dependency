@@ -8,14 +8,25 @@
   "selectDependencySql": "SELECT groupId, artifactId, version FROM dependencies WHERE sha1 = ?;",
   "addDependencySql": "INSERT INTO dependencies ( groupId, artifactId, version, sha1 ) VALUES ( ?, ?, ?, ? );",
   "inspectJar": true,
+  "mavenJarPath": "/META-INF/maven",
   "pomPropertiesFile": "pom.properties",
+  "groupIdAttribute": "groupId",
+  "artifactIdAttribute": "artifactId",
+  "versionAttribute": "version",
   "maxDepth": 8,
+  "extensions": [
+    "ear",
+    "jar",
+    "mar",
+    "war"
+  ],
   "helpSummary": "java -jar find-dependency.jar [OPTIONS]",
-  "repositories":[
+  "repositories": [
     {
       "id": "mavenCentral",
       "name": "Maven Central",
-      "url": "http://search.maven.org/solrsearch/select?q=1:%22{}%22&rows=20&wt=json"
+      "url": "http://search.maven.org/solrsearch/select?q=1:%22{}%22&rows=20&wt=json",
+      "replacementToken": "{}"
     }
   ],
   "commandLineOptions": [
@@ -25,6 +36,22 @@
       "description": "Directory to find dependencies for.",
       "hasArg": true,
       "argName": "dir",
+      "argOptional": false
+    },
+    {
+      "shortName": "f",
+      "longName": "format",
+      "description": "The output file format. One of `JSON` or `POM`.",
+      "hasArg": true,
+      "argName": "fmt",
+      "argOptional": false
+    },
+    {
+      "shortName": "o",
+      "longName": "output",
+      "description": "The output file.",
+      "hasArg": true,
+      "argName": "file",
       "argOptional": false
     }
   ]

@@ -4,6 +4,15 @@ public class Repository {
     private String id;
     private String name;
     private String url;
+    private String replacementToken;
+
+    public String getReplacementToken() {
+        return replacementToken;
+    }
+
+    public void setReplacementToken( String replacementToken ) {
+        this.replacementToken = replacementToken;
+    }
 
     public String getId() {
         return id;

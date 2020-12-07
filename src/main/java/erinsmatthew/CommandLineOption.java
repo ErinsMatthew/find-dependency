@@ -10,6 +10,14 @@ public class CommandLineOption {
     private char valueSeparator;
     private int numArgs;
 
+    public boolean hasArg() {
+        return hasArg;
+    }
+
+    public void setHasArg( boolean hasArg ) {
+        this.hasArg = hasArg;
+    }
+
     public String getShortName() {
         return shortName;
     }
@@ -24,14 +32,6 @@ public class CommandLineOption {
 
     public void setLongName( String longName ) {
         this.longName = longName;
-    }
-
-    public boolean hasArg() {
-        return hasArg;
-    }
-
-    public void setHasArg( boolean hasArg ) {
-        this.hasArg = hasArg;
     }
 
     public String getArgName() {
