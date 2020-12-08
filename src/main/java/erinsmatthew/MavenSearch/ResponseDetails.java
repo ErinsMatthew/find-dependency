@@ -5,6 +5,7 @@ import java.util.List;
 public class ResponseDetails {
     private int numFound;
     private int start;
+    private List< ResponseDoc > docs;
 
     public int getNumFound() {
         return numFound;
@@ -29,6 +30,4 @@ public class ResponseDetails {
     public void setDocs( List< ResponseDoc > docs ) {
         this.docs = docs;
     }
-
-    private List< ResponseDoc > docs;
 }

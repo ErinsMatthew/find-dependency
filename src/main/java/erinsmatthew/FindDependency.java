@@ -74,7 +74,7 @@ public class FindDependency {
                                                            .filter( Files::isRegularFile )
                                                            .filter(
                                                                    FindDependency::isValidExtension )
-                                                           .map( f -> new AbstractMap.SimpleEntry< Path, String >(
+                                                           .map( f -> new AbstractMap.SimpleEntry<>(
                                                                    f,
                                                                    HashUtil.calculateSHA1( f ) ) )
                                                            .map( se -> {
@@ -100,7 +100,7 @@ public class FindDependency {
                     switch ( cfg.getOutputFormat() ) {
                         case JSON:
                         default:
-                            try ( Writer writer = new FileWriter( cfg.getOutputFileName() ) ) {
+                            try ( FileWriter writer = new FileWriter( cfg.getOutputFileName() ) ) {
                                 new Gson().toJson( dependencies, writer );
                             } catch ( IOException e ) {
                                 log.fatal( "Error writing JSON to file.", e );
@@ -108,7 +108,25 @@ public class FindDependency {
                             break;
 
                         case POM:
-                            System.out.print( dependencies.toString() );
+                            try ( FileWriter writer = new FileWriter( cfg.getOutputFileName() ) ) {
+                                dependencies.stream()
+                                            .map( d -> {
+                                                return String.format(
+                                                        "%n<!-- File: %s -->%n<dependency>%n    <groupId>%s</groupId>%n    <artifactId>%s</artifactId>%n    <version>%s</version>%n</dependency>%n",
+                                                        d.getOriginalFileName(), d.getGroupId(),
+                                                        d.getArtifactId(), d.getVersion() );
+                                            } )
+                                            .forEach( s -> {
+                                                try {
+                                                    writer.write( s );
+                                                } catch ( IOException e ) {
+                                                    log.fatal( "Error writing dependency to POM.",
+                                                               e );
+                                                }
+                                            } );
+                            } catch ( IOException e ) {
+                                log.fatal( "Error writing POM to file.", e );
+                            }
                             break;
                     }
                 }

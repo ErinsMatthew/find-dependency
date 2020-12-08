@@ -51,7 +51,7 @@
       "longName": "output",
       "description": "The output file.",
       "hasArg": true,
-      "argName": "file",
+      "argName": "fn",
       "argOptional": false
     }
   ]

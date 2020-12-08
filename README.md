@@ -34,27 +34,35 @@ will look for this file in the class path.
 
 # Usage
 ```shell script
-$ java -jar find-dependency-1.0.jar -d /path/to/archives
+$ java -jar find-dependency-1.0.jar -d /path/to/archives [-o fn [-f fmt]]
 ```
 
 # Command Line Options
 Option | Description | Default
 ------ | ----------- | -------
--d, --directory | The directory to look for Java archive files. | None. This option is required.
--f, --format | The output file format. One of `JSON` or `POM`. Only valid when used with `-o` or `--output`. | JSON
--o, --output | The output file. | None. If not specified, nothing is output, just loaded in the database.
+-d dir, --directory dir | The directory to look for Java archive files. | None. This option is required.
+-f fmt, --format fmt | The output file format. One of `JSON` or `POM`. Only valid when used with `-o` or `--output`. | JSON
+-o fn, --output fn | The output file. | None. If not specified, nothing is output, just loaded in the database.
 
 # Dependencies
 This program makes use of features that require Java 11 or newer
 (e.g., [HTTP Client](https://openjdk.java.net/groups/net/httpclient/intro.html)).
 
-This program also makes use of the following external libraries.
+This program also makes use of the following external libraries:
 
 * [Apache Commons CLI](https://commons.apache.org/proper/commons-cli/index.html)
 * [Apache Log4j2](https://logging.apache.org/log4j/2.x/)
 * [Google Guava](https://github.com/google/guava)
 * [Google Gson](https://github.com/google/gson)
 * [H2 Database](http://h2database.com/html/main.html)
+
+# Backend Database
+This program uses H2 as a database to cache results. You can easily use a different
+database by changing the driver, connection string, and SQL statements in
+`find-dependency.json`.
+
+# Future Enhancements
+1. Better results handling when searching multiple Maven repositories.
 
 # Credits
 This program was heavily-inspired by [make-pom](https://github.com/sjbotha/make-pom).
