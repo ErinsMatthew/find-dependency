@@ -1,0 +1,20 @@
+
+h
+java:S3776""RRefactor this method to reduce its Cognitive Complexity from 32 to the 15 allowed.(Çµí‘
+V	java:S125;"<This block of commented-out lines of code should be removed.(²ª¹Ÿûÿÿÿÿ
+F
+java:S4524f"+Move this default to the end of the switch.(Ý–Ò˜ÿÿÿÿÿ
+n
+java:S1602q"SRemove useless curly braces around statement and then remove useless return keyword(þÓë¬ÿÿÿÿÿ
+u
+java:S2142Ü"^Either re-interrupt this method or rethrow the "InterruptedException" that can be caught here.(òž¶È
+P
+java:S1141g"5Extract this nested try block into a separate method.(¬°±¢øÿÿÿÿ
+P
+java:S1141o"5Extract this nested try block into a separate method.(¬°±¢øÿÿÿÿ
+Z
+java:S2095H"DUse try-with-resources or close this "Stream" in a "finally" clause.(Íæ½“
+^
+java:S2095ñ"GUse try-with-resources or close this "!Unknown!" in a "finally" clause.(¡ý˜ð
+_
+java:S2095>"DUse try-with-resources or close this "Stream" in a "finally" clause.(ø×Ëûÿÿÿÿÿ
